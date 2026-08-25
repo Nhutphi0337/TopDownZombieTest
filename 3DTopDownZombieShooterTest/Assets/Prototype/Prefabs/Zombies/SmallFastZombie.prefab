@@ -953,7 +953,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   zombieDef: {fileID: 0}
-  thinkInterval: 0.2
+  thinkInterval: 0.1
   animationController: {fileID: 0}
   hitflash: {fileID: 0}
   movement: {fileID: 0}
