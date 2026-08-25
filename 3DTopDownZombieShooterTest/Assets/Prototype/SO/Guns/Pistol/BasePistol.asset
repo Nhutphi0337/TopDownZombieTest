@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfbe8452bef1631498a322e44365b6a1, type: 3}
+  m_Name: BasePistol
+  m_EditorClassIdentifier: 
+  displayName: BasePistol
+  gunPrefab: {fileID: 995551636495992954, guid: d67a5d6f7e8e3be47b04a44da52dfe04, type: 3}
+  gunType: {fileID: 11400000, guid: 59bb030b39413524089553010890f15f, type: 2}
+  icon: {fileID: 1196490660, guid: 8755f8a4396ea8147a162a3515d68684, type: 3}
+  range: 40
+  bulletSpeed: 50
+  fireRate: 0.25
+  attackDef: {fileID: 11400000, guid: a0ebad4ebd4d4ca4d8abdeaaf9291d27, type: 2}
+  defaultAmmoDef: {fileID: 11400000, guid: 78a8ed478a79d0c4b954ab74bb2fba07, type: 2}
+  magazineSize: 12
+  reloadTime: 0.5
+  muzzleFlashEffect: {fileID: 6878400978898134786, guid: 6a7cd0155a59dc04f85f1845759409e4, type: 3}
+  firingSound: {fileID: 11400000, guid: 76d53b18a03acd844a03b9dcad9c142c, type: 2}

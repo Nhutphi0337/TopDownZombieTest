@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f256545e031209845bc393c804a9f2d0, type: 3}
+  m_Name: RifleShoot
+  m_EditorClassIdentifier: 
+  category: 0
+  priority: 50
+  clips:
+  - {fileID: 8300000, guid: a0d358d45f42a4a4a99399b343c6dae3, type: 3}
+  maxSimultaneous: 24
+  volume: 1
+  volumeVariation: 0.2
+  pitch: 1
+  pitchVariation: 0.2
+  spatialBlend: 1
+  minDistance: 1
+  maxDistance: 30

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5170b3950a8cc52408e1f0ad9f806bda, type: 3}
+  m_Name: BaseShotGunDef
+  m_EditorClassIdentifier: 
+  displayName: BaseShotGun
+  gunPrefab: {fileID: 7271793656559357829, guid: 5e6e38372a56c4342a5cbb50b990782e, type: 3}
+  gunType: {fileID: 11400000, guid: a48cac92134171147aabf634cc432d6f, type: 2}
+  icon: {fileID: 2015384096, guid: 8755f8a4396ea8147a162a3515d68684, type: 3}
+  range: 20
+  bulletSpeed: 50
+  fireRate: 0.5
+  attackDef: {fileID: 11400000, guid: 25e33099df450f2429d72c8a9d270ce8, type: 2}
+  defaultAmmoDef: {fileID: 11400000, guid: 6c4918cb2872e4447ad48cf8d4c72771, type: 2}
+  magazineSize: 12
+  reloadTime: 0.5
+  muzzleFlashEffect: {fileID: 1559594598448447379, guid: 62ecea982f333ab419d15f6ba08bdd45, type: 3}
+  firingSound: {fileID: 11400000, guid: cbdc1f8d88c9b224583d5038fccf602f, type: 2}
+  pelletCount: 8
+  spreadAngle: 15

@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfbe8452bef1631498a322e44365b6a1, type: 3}
+  m_Name: BaseRifle
+  m_EditorClassIdentifier: 
+  displayName: BaseRifle
+  gunPrefab: {fileID: 995551636495992954, guid: ce7caa9bc663aff478d25dcb37eb549d, type: 3}
+  gunType: {fileID: 11400000, guid: 120816f24a6079545b27b109d379f484, type: 2}
+  icon: {fileID: -186436957, guid: 8755f8a4396ea8147a162a3515d68684, type: 3}
+  range: 50
+  bulletSpeed: 50
+  fireRate: 0.1
+  attackDef: {fileID: 11400000, guid: d424488403e7e8946aba595d0ac41e67, type: 2}
+  defaultAmmoDef: {fileID: 11400000, guid: a92224a515044b5418af29f94013483a, type: 2}
+  magazineSize: 30
+  reloadTime: 0.5
+  muzzleFlashEffect: {fileID: 1714506676965320978, guid: 87b2e75c13466804fb0e5ccafd0bd3a4, type: 3}
+  firingSound: {fileID: 11400000, guid: 2e84d72223d48e24b8fad5f5daf02121, type: 2}

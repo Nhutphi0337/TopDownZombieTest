@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f256545e031209845bc393c804a9f2d0, type: 3}
+  m_Name: BaseZombieGetHitSound
+  m_EditorClassIdentifier: 
+  category: 0
+  priority: 50
+  clips:
+  - {fileID: 8300000, guid: 56de02ef5cb8b8d48bf028165cbc659b, type: 3}
+  - {fileID: 8300000, guid: 2d0bf879889f00547a129fd958e2c624, type: 3}
+  - {fileID: 8300000, guid: 153128fecda1a15469d0dfaaa90f592b, type: 3}
+  maxSimultaneous: 24
+  volume: 1
+  volumeVariation: 0.164
+  pitch: 1
+  pitchVariation: 0.201
+  spatialBlend: 1
+  minDistance: 1
+  maxDistance: 30

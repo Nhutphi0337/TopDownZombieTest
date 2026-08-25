@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 382c94af4ab7ed0479649ae711db37d4, type: 3}
+  m_Name: BaseRifleAmmo
+  m_EditorClassIdentifier: 
+  displayName: BaseRifleAmmo
+  type: {fileID: 11400000, guid: 872ca811bd42b894a9a584428a68aa54, type: 2}
+  bulletPrefab: {fileID: 8628841127873658093, guid: 716ea772c38c1114f803a0bba65d608d, type: 3}

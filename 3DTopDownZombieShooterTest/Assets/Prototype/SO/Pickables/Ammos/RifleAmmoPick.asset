@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b0f1791284cb744ba2574a1628e183b, type: 3}
+  m_Name: RifleAmmoPick
+  m_EditorClassIdentifier: 
+  <amount>k__BackingField: 60
+  <itemType>k__BackingField: 1
+  <pickSound>k__BackingField: {fileID: 11400000, guid: 709f3c7a52f586f4cb7417090f5026ff, type: 2}
+  <pickableItem>k__BackingField: {fileID: 11400000, guid: a92224a515044b5418af29f94013483a, type: 2}
+  <prefab>k__BackingField: {fileID: 5250282390894192540, guid: 13f6e63eb5041ca419401a8e07e83404, type: 3}
