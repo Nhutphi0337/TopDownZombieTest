@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BaseZombieDeadSound
   m_EditorClassIdentifier: 
   category: 0
-  priority: 50
+  priority: 75
   clips:
   - {fileID: 8300000, guid: 83df7492a59c1074488eba1d9c19cd72, type: 3}
   - {fileID: 8300000, guid: 77551a7423bb3d84b951d187aa067872, type: 3}
