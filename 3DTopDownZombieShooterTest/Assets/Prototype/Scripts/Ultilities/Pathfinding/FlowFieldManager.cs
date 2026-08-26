@@ -391,28 +391,85 @@ public class FlowFieldManager : MonoBehaviour
 
     private void AllocateNativeArrays()
     {
-        nativeWalkable = new NativeArray<byte>(totalCellCount, Allocator.Persistent);
-        nativeHeights = new NativeArray<float>(totalCellCount, Allocator.Persistent);
-        nativeWorldPositions = new NativeArray<float3>(totalCellCount, Allocator.Persistent);
-        nativeConnectionMasks = new NativeArray<byte>(totalCellCount, Allocator.Persistent);
+        nativeWalkable =
+            new NativeArray<byte>(
+                totalCellCount,
+                Allocator.Persistent);
 
-        nativeCosts = new NativeArray<int>(totalCellCount, Allocator.Persistent);
-        nativeCostVersions = new NativeArray<int>(totalCellCount, Allocator.Persistent);
-        nativeProcessedVersions = new NativeArray<int>(totalCellCount, Allocator.Persistent);
+        nativeHeights =
+            new NativeArray<float>(
+                totalCellCount,
+                Allocator.Persistent);
 
-        nativeReachableCells = new NativeArray<int>(totalCellCount, Allocator.Persistent);
-        nativeReachableCount = new NativeArray<int>(1, Allocator.Persistent);
+        nativeWorldPositions =
+            new NativeArray<float3>(
+                totalCellCount,
+                Allocator.Persistent);
 
-        heapCapacity = Mathf.Max(totalCellCount * 8, 64);
+        nativeConnectionMasks =
+            new NativeArray<byte>(
+                totalCellCount,
+                Allocator.Persistent);
 
-        nativeHeapIndices = new NativeArray<int>(heapCapacity, Allocator.Persistent);
-        nativeHeapCosts = new NativeArray<int>(heapCapacity, Allocator.Persistent);
+        nativeCosts =
+            new NativeArray<int>(
+                totalCellCount,
+                Allocator.Persistent);
 
-        directions = new NativeArray<float3>(totalCellCount, Allocator.Persistent);
-        buildingDirections = new NativeArray<float3>(totalCellCount, Allocator.Persistent);
+        nativeCostVersions =
+            new NativeArray<int>(
+                totalCellCount,
+                Allocator.Persistent);
 
-        directionVersions = new NativeArray<int>(totalCellCount, Allocator.Persistent);
-        buildingDirectionVersions = new NativeArray<int>(totalCellCount, Allocator.Persistent);
+        nativeProcessedVersions =
+            new NativeArray<int>(
+                totalCellCount,
+                Allocator.Persistent);
+
+        nativeReachableCells =
+            new NativeArray<int>(
+                totalCellCount,
+                Allocator.Persistent);
+
+        nativeReachableCount =
+            new NativeArray<int>(
+                1,
+                Allocator.Persistent);
+
+        heapCapacity =
+            Mathf.Max(
+                totalCellCount * 8,
+                64);
+
+        nativeHeapIndices =
+            new NativeArray<int>(
+                heapCapacity,
+                Allocator.Persistent);
+
+        nativeHeapCosts =
+            new NativeArray<int>(
+                heapCapacity,
+                Allocator.Persistent);
+
+        directions =
+            new NativeArray<float3>(
+                totalCellCount,
+                Allocator.Persistent);
+
+        buildingDirections =
+            new NativeArray<float3>(
+                totalCellCount,
+                Allocator.Persistent);
+
+        directionVersions =
+            new NativeArray<int>(
+                totalCellCount,
+                Allocator.Persistent);
+
+        buildingDirectionVersions =
+            new NativeArray<int>(
+                totalCellCount,
+                Allocator.Persistent);
     }
 
     private void DisposeNativeArrays()
@@ -481,12 +538,16 @@ public class FlowFieldManager : MonoBehaviour
             for (int z = 0; z < height; z++)
             {
                 int index = GetIndex(x, z);
-                Vector3 cellPosition = GetGridPosition(x, z);
+                Vector3 cellPosition =
+                    GetGridPosition(x, z);
 
-                worldPositions[index] = cellPosition;
+                worldPositions[index] =
+                    cellPosition;
 
                 bool hasGround =
-                    TryGetGround(cellPosition, out RaycastHit hit);
+                    TryGetGround(
+                        cellPosition,
+                        out RaycastHit hit);
 
                 if (!hasGround)
                 {
@@ -497,7 +558,9 @@ public class FlowFieldManager : MonoBehaviour
                 }
 
                 float slopeAngle =
-                    Vector3.Angle(hit.normal, Vector3.up);
+                    Vector3.Angle(
+                        hit.normal,
+                        Vector3.up);
 
                 bool validSlope =
                     slopeAngle <= maxSlopeAngle;
@@ -508,9 +571,14 @@ public class FlowFieldManager : MonoBehaviour
                 walkable[index] =
                     validSlope && !blocked;
 
-                heights[index] = hit.point.y;
-                worldPositions[index] = hit.point;
-                groundNormals[index] = hit.normal;
+                heights[index] =
+                    hit.point.y;
+
+                worldPositions[index] =
+                    hit.point;
+
+                groundNormals[index] =
+                    hit.normal;
             }
         }
 
@@ -519,11 +587,18 @@ public class FlowFieldManager : MonoBehaviour
         for (int i = 0; i < totalCellCount; i++)
         {
             nativeWalkable[i] =
-                walkable[i] ? (byte)1 : (byte)0;
+                walkable[i]
+                    ? (byte)1
+                    : (byte)0;
 
-            nativeHeights[i] = heights[i];
-            nativeWorldPositions[i] = worldPositions[i];
-            nativeConnectionMasks[i] = connectionMasks[i];
+            nativeHeights[i] =
+                heights[i];
+
+            nativeWorldPositions[i] =
+                worldPositions[i];
+
+            nativeConnectionMasks[i] =
+                connectionMasks[i];
         }
     }
 
@@ -533,7 +608,8 @@ public class FlowFieldManager : MonoBehaviour
         {
             for (int z = 0; z < height; z++)
             {
-                int index = GetIndex(x, z);
+                int index =
+                    GetIndex(x, z);
 
                 if (!walkable[index])
                 {
@@ -543,13 +619,17 @@ public class FlowFieldManager : MonoBehaviour
 
                 byte mask = 0;
 
-                for (int direction = 0; direction < 8; direction++)
+                for (int direction = 0;
+                     direction < 8;
+                     direction++)
                 {
                     int neighborX =
-                        x + NeighborX[direction];
+                        x +
+                        NeighborX[direction];
 
                     int neighborZ =
-                        z + NeighborZ[direction];
+                        z +
+                        NeighborZ[direction];
 
                     if (neighborX < 0 ||
                         neighborX >= width ||
@@ -560,20 +640,30 @@ public class FlowFieldManager : MonoBehaviour
                     }
 
                     int neighborIndex =
-                        GetIndex(neighborX, neighborZ);
+                        GetIndex(
+                            neighborX,
+                            neighborZ);
 
-                    if (!CanMoveBetween(index, neighborIndex))
+                    if (!CanMoveBetween(
+                            index,
+                            neighborIndex))
+                    {
                         continue;
+                    }
 
-                    mask |= NeighborBits[direction];
+                    mask |=
+                        NeighborBits[direction];
                 }
 
-                connectionMasks[index] = mask;
+                connectionMasks[index] =
+                    mask;
             }
         }
     }
 
-    private bool CanMoveBetween(int fromIndex, int toIndex)
+    private bool CanMoveBetween(
+        int fromIndex,
+        int toIndex)
     {
         if (!walkable[fromIndex] ||
             !walkable[toIndex])
@@ -586,14 +676,23 @@ public class FlowFieldManager : MonoBehaviour
                 heights[fromIndex] -
                 heights[toIndex]);
 
-        if (heightDifference > maxStepHeight)
+        if (heightDifference >
+            maxStepHeight)
+        {
             return false;
+        }
 
-        int fromX = fromIndex % width;
-        int fromZ = fromIndex / width;
+        int fromX =
+            fromIndex % width;
 
-        int toX = toIndex % width;
-        int toZ = toIndex / width;
+        int fromZ =
+            fromIndex / width;
+
+        int toX =
+            toIndex % width;
+
+        int toZ =
+            toIndex / width;
 
         bool diagonal =
             fromX != toX &&
@@ -602,14 +701,21 @@ public class FlowFieldManager : MonoBehaviour
         if (!diagonal)
             return true;
 
-        int dx = toX - fromX;
-        int dz = toZ - fromZ;
+        int dx =
+            toX - fromX;
+
+        int dz =
+            toZ - fromZ;
 
         int horizontalIndex =
-            GetIndex(fromX + dx, fromZ);
+            GetIndex(
+                fromX + dx,
+                fromZ);
 
         int verticalIndex =
-            GetIndex(fromX, fromZ + dz);
+            GetIndex(
+                fromX,
+                fromZ + dz);
 
         if (!walkable[horizontalIndex] ||
             !walkable[verticalIndex])
@@ -642,7 +748,8 @@ public class FlowFieldManager : MonoBehaviour
         out int z)
     {
         Vector3 localPosition =
-            worldPosition - transform.position;
+            worldPosition -
+            transform.position;
 
         x =
             Mathf.FloorToInt(
@@ -665,12 +772,17 @@ public class FlowFieldManager : MonoBehaviour
         return true;
     }
 
-    private int GetIndex(int x, int z)
+    private int GetIndex(
+        int x,
+        int z)
     {
-        return x + z * width;
+        return x +
+               z * width;
     }
 
-    private Vector3 GetGridPosition(int x, int z)
+    private Vector3 GetGridPosition(
+        int x,
+        int z)
     {
         return transform.position +
                new Vector3(
@@ -685,7 +797,8 @@ public class FlowFieldManager : MonoBehaviour
     {
         Vector3 origin =
             position +
-            Vector3.up * raycastHeight;
+            Vector3.up *
+            raycastHeight;
 
         return Physics.Raycast(
             origin,
@@ -696,7 +809,8 @@ public class FlowFieldManager : MonoBehaviour
             QueryTriggerInteraction.Ignore);
     }
 
-    private bool IsBlocked(Vector3 groundPosition)
+    private bool IsBlocked(
+        Vector3 groundPosition)
     {
         Vector3 center =
             groundPosition +
@@ -717,33 +831,202 @@ public class FlowFieldManager : MonoBehaviour
             QueryTriggerInteraction.Ignore);
     }
 
-    public Vector3 GetDirection(Vector3 worldPosition)
+    // ------------------------------------------------------------------------
+    // SMOOTH FLOW-FIELD SAMPLING
+    // ------------------------------------------------------------------------
+
+    public Vector3 GetDirection(
+        Vector3 worldPosition)
     {
         if (!hasValidFlowField)
             return Vector3.zero;
 
-        if (!TryGetCellCoordinates(
-                worldPosition,
-                out int x,
-                out int z))
-        {
+        Vector3 localPosition =
+            worldPosition -
+            transform.position;
+
+        float gridX =
+            localPosition.x / cellSize -
+            0.5f;
+
+        float gridZ =
+            localPosition.z / cellSize -
+            0.5f;
+
+        int x0 =
+            Mathf.FloorToInt(gridX);
+
+        int z0 =
+            Mathf.FloorToInt(gridZ);
+
+        float tx =
+            gridX - x0;
+
+        float tz =
+            gridZ - z0;
+
+        /*
+         * Clamp to the valid grid range.
+         *
+         * We keep x1/z1 equal to x0/z0 at the
+         * outer edge so the interpolation does
+         * not sample outside the array.
+         */
+        x0 =
+            Mathf.Clamp(
+                x0,
+                0,
+                width - 1);
+
+        z0 =
+            Mathf.Clamp(
+                z0,
+                0,
+                height - 1);
+
+        int x1 =
+            Mathf.Min(
+                x0 + 1,
+                width - 1);
+
+        int z1 =
+            Mathf.Min(
+                z0 + 1,
+                height - 1);
+
+        float3 blendedDirection =
+            float3.zero;
+
+        float totalWeight = 0f;
+
+        /*
+         * Bottom-left.
+         */
+        float weight00 =
+            (1f - tx) *
+            (1f - tz);
+
+        AddSampledDirection(
+            x0,
+            z0,
+            weight00,
+            ref blendedDirection,
+            ref totalWeight);
+
+        /*
+         * Bottom-right.
+         */
+        float weight10 =
+            tx *
+            (1f - tz);
+
+        AddSampledDirection(
+            x1,
+            z0,
+            weight10,
+            ref blendedDirection,
+            ref totalWeight);
+
+        /*
+         * Top-left.
+         */
+        float weight01 =
+            (1f - tx) *
+            tz;
+
+        AddSampledDirection(
+            x0,
+            z1,
+            weight01,
+            ref blendedDirection,
+            ref totalWeight);
+
+        /*
+         * Top-right.
+         */
+        float weight11 =
+            tx *
+            tz;
+
+        AddSampledDirection(
+            x1,
+            z1,
+            weight11,
+            ref blendedDirection,
+            ref totalWeight);
+
+        if (totalWeight <= 0.0001f)
             return Vector3.zero;
-        }
 
-        int index = GetIndex(x, z);
+        blendedDirection /=
+            totalWeight;
 
-        if (directionVersions[index] != publishedVersion)
+        blendedDirection.y = 0f;
+
+        float lengthSq =
+            math.lengthsq(
+                blendedDirection);
+
+        if (lengthSq < 0.0001f)
             return Vector3.zero;
 
-        float3 direction = directions[index];
-
-        if (math.lengthsq(direction) < 0.0001f)
-            return Vector3.zero;
+        blendedDirection =
+            math.normalize(
+                blendedDirection);
 
         return new Vector3(
-            direction.x,
-            direction.y,
-            direction.z);
+            blendedDirection.x,
+            blendedDirection.y,
+            blendedDirection.z);
+    }
+
+    private void AddSampledDirection(
+        int x,
+        int z,
+        float weight,
+        ref float3 blendedDirection,
+        ref float totalWeight)
+    {
+        if (weight <= 0f)
+            return;
+
+        int index =
+            GetIndex(x, z);
+
+        /*
+         * Ignore cells that are not part of
+         * the currently published flow field.
+         */
+        if (directionVersions[index] !=
+            publishedVersion)
+        {
+            return;
+        }
+
+        /*
+         * Ignore blocked cells.
+         *
+         * This prevents interpolation from
+         * pulling a zombie through an obstacle.
+         */
+        if (!walkable[index])
+            return;
+
+        float3 direction =
+            directions[index];
+
+        if (math.lengthsq(direction) <
+            0.0001f)
+        {
+            return;
+        }
+
+        blendedDirection +=
+            direction *
+            weight;
+
+        totalWeight +=
+            weight;
     }
 
     public bool TryGetGround(
@@ -755,13 +1038,20 @@ public class FlowFieldManager : MonoBehaviour
                 worldPosition,
                 out RaycastHit hit))
         {
-            groundPosition = hit.point;
-            groundNormal = hit.normal;
+            groundPosition =
+                hit.point;
+
+            groundNormal =
+                hit.normal;
+
             return true;
         }
 
-        groundPosition = worldPosition;
-        groundNormal = Vector3.up;
+        groundPosition =
+            worldPosition;
+
+        groundNormal =
+            Vector3.up;
 
         return false;
     }
@@ -779,7 +1069,8 @@ public class FlowFieldManager : MonoBehaviour
             return false;
         }
 
-        int index = GetIndex(x, z);
+        int index =
+            GetIndex(x, z);
 
         cell =
             new FlowFieldCell(
@@ -791,7 +1082,8 @@ public class FlowFieldManager : MonoBehaviour
                 walkable[index]);
 
         cell.Cost =
-            nativeCostVersions[index] == publishedVersion
+            nativeCostVersions[index] ==
+            publishedVersion
                 ? nativeCosts[index]
                 : int.MaxValue;
 
@@ -801,7 +1093,8 @@ public class FlowFieldManager : MonoBehaviour
         return true;
     }
 
-    public bool IsWalkable(Vector3 worldPosition)
+    public bool IsWalkable(
+        Vector3 worldPosition)
     {
         if (!TryGetCellCoordinates(
                 worldPosition,
@@ -811,14 +1104,16 @@ public class FlowFieldManager : MonoBehaviour
             return false;
         }
 
-        return walkable[GetIndex(x, z)];
+        return walkable[
+            GetIndex(x, z)];
     }
 
     public bool TryGetRecoveryDirection(
         Vector3 worldPosition,
         out Vector3 direction)
     {
-        direction = Vector3.zero;
+        direction =
+            Vector3.zero;
 
         if (!TryGetCellCoordinates(
                 worldPosition,
@@ -829,19 +1124,24 @@ public class FlowFieldManager : MonoBehaviour
         }
 
         int centerIndex =
-            GetIndex(centerX, centerZ);
+            GetIndex(
+                centerX,
+                centerZ);
 
         if (walkable[centerIndex])
         {
             direction =
-                GetDirection(worldPosition);
+                GetDirection(
+                    worldPosition);
 
             return direction.sqrMagnitude >
                    0.0001f;
         }
 
         int bestIndex = -1;
-        float bestDistanceSqr = float.MaxValue;
+        float bestDistanceSqr =
+            float.MaxValue;
+
         int maxSearchRadius = 6;
 
         for (int radius = 1;
@@ -899,11 +1199,17 @@ public class FlowFieldManager : MonoBehaviour
                     float distanceSqr =
                         offset.sqrMagnitude;
 
-                    if (distanceSqr >= bestDistanceSqr)
+                    if (distanceSqr >=
+                        bestDistanceSqr)
+                    {
                         continue;
+                    }
 
-                    bestDistanceSqr = distanceSqr;
-                    bestIndex = index;
+                    bestDistanceSqr =
+                        distanceSqr;
+
+                    bestIndex =
+                        index;
                 }
             }
 
@@ -920,8 +1226,11 @@ public class FlowFieldManager : MonoBehaviour
 
         direction.y = 0f;
 
-        if (direction.sqrMagnitude < 0.0001f)
+        if (direction.sqrMagnitude <
+            0.0001f)
+        {
             return false;
+        }
 
         direction.Normalize();
 
@@ -933,11 +1242,16 @@ public class FlowFieldManager : MonoBehaviour
         if (walkable == null)
             return;
 
-        for (int x = 0; x < width; x++)
+        for (int x = 0;
+             x < width;
+             x++)
         {
-            for (int z = 0; z < height; z++)
+            for (int z = 0;
+                 z < height;
+                 z++)
             {
-                int index = GetIndex(x, z);
+                int index =
+                    GetIndex(x, z);
 
                 Gizmos.color =
                     walkable[index]
@@ -958,8 +1272,11 @@ public class FlowFieldManager : MonoBehaviour
                     GetDirection(
                         worldPositions[index]);
 
-                if (direction.sqrMagnitude < 0.001f)
+                if (direction.sqrMagnitude <
+                    0.001f)
+                {
                     continue;
+                }
 
                 Gizmos.DrawLine(
                     worldPositions[index],
@@ -1027,7 +1344,8 @@ public class FlowFieldManager : MonoBehaviour
                     continue;
                 }
 
-                ProcessedVersions[currentIndex] = Version;
+                ProcessedVersions[currentIndex] =
+                    Version;
 
                 ReachableCells[
                     reachableCount++] =
@@ -1060,18 +1378,21 @@ public class FlowFieldManager : MonoBehaviour
                  direction++)
             {
                 byte bit =
-                    GetNeighborBit(direction);
+                    GetNeighborBit(
+                        direction);
 
                 if ((mask & bit) == 0)
                     continue;
 
                 int neighborX =
                     x +
-                    GetNeighborX(direction);
+                    GetNeighborX(
+                        direction);
 
                 int neighborZ =
                     z +
-                    GetNeighborZ(direction);
+                    GetNeighborZ(
+                        direction);
 
                 int neighborIndex =
                     neighborX +
@@ -1088,7 +1409,8 @@ public class FlowFieldManager : MonoBehaviour
                     movementCost;
 
                 if (HasCost(neighborIndex) &&
-                    newCost >= Costs[neighborIndex])
+                    newCost >=
+                    Costs[neighborIndex])
                 {
                     continue;
                 }
@@ -1129,27 +1451,36 @@ public class FlowFieldManager : MonoBehaviour
                        slopePenalty * 2f);
         }
 
-        private bool HasCost(int index)
+        private bool HasCost(
+            int index)
         {
-            return CostVersions[index] == Version;
+            return CostVersions[index] ==
+                   Version;
         }
 
         private void SetCost(
             int index,
             int cost)
         {
-            CostVersions[index] = Version;
-            Costs[index] = cost;
+            CostVersions[index] =
+                Version;
+
+            Costs[index] =
+                cost;
         }
 
         private void HeapPush(
             int index,
             int cost)
         {
-            if (heapCount >= HeapIndices.Length)
+            if (heapCount >=
+                HeapIndices.Length)
+            {
                 return;
+            }
 
-            int position = heapCount++;
+            int position =
+                heapCount++;
 
             while (position > 0)
             {
@@ -1165,11 +1496,15 @@ public class FlowFieldManager : MonoBehaviour
                 HeapCosts[position] =
                     HeapCosts[parent];
 
-                position = parent;
+                position =
+                    parent;
             }
 
-            HeapIndices[position] = index;
-            HeapCosts[position] = cost;
+            HeapIndices[position] =
+                index;
+
+            HeapCosts[position] =
+                cost;
         }
 
         private bool HeapPop(
@@ -1183,8 +1518,11 @@ public class FlowFieldManager : MonoBehaviour
                 return false;
             }
 
-            index = HeapIndices[0];
-            cost = HeapCosts[0];
+            index =
+                HeapIndices[0];
+
+            cost =
+                HeapCosts[0];
 
             heapCount--;
 
@@ -1207,18 +1545,25 @@ public class FlowFieldManager : MonoBehaviour
                 if (left >= heapCount)
                     break;
 
-                int right = left + 1;
-                int smallest = left;
+                int right =
+                    left + 1;
+
+                int smallest =
+                    left;
 
                 if (right < heapCount &&
                     HeapCosts[right] <
                     HeapCosts[left])
                 {
-                    smallest = right;
+                    smallest =
+                        right;
                 }
 
-                if (HeapCosts[smallest] >= lastCost)
+                if (HeapCosts[smallest] >=
+                    lastCost)
+                {
                     break;
+                }
 
                 HeapIndices[position] =
                     HeapIndices[smallest];
@@ -1226,26 +1571,35 @@ public class FlowFieldManager : MonoBehaviour
                 HeapCosts[position] =
                     HeapCosts[smallest];
 
-                position = smallest;
+                position =
+                    smallest;
             }
 
-            HeapIndices[position] = lastIndex;
-            HeapCosts[position] = lastCost;
+            HeapIndices[position] =
+                lastIndex;
+
+            HeapCosts[position] =
+                lastCost;
 
             return true;
         }
 
-        private static int GetNeighborX(int direction)
+        private static int GetNeighborX(
+            int direction)
         {
             switch (direction)
             {
                 case 0: return -1;
                 case 1: return 1;
-                default: return direction >= 6 ? 1 : 0;
+                default:
+                    return direction >= 6
+                        ? 1
+                        : 0;
             }
         }
 
-        private static int GetNeighborZ(int direction)
+        private static int GetNeighborZ(
+            int direction)
         {
             switch (direction)
             {
@@ -1259,7 +1613,8 @@ public class FlowFieldManager : MonoBehaviour
             }
         }
 
-        private static byte GetNeighborBit(int direction)
+        private static byte GetNeighborBit(
+            int direction)
         {
             return (byte)(1 << direction);
         }
@@ -1288,41 +1643,64 @@ public class FlowFieldManager : MonoBehaviour
 
         public void Execute(int index)
         {
-            if (CostVersions[index] != Version)
+            if (CostVersions[index] !=
+                Version)
             {
-                Directions[index] = float3.zero;
-                DirectionVersions[index] = 0;
+                Directions[index] =
+                    float3.zero;
+
+                DirectionVersions[index] =
+                    0;
+
                 return;
             }
 
-            int x = index % Width;
-            int z = index / Width;
+            int x =
+                index % Width;
 
-            byte mask = ConnectionMasks[index];
+            int z =
+                index / Width;
 
-            int currentCost = Costs[index];
-            int bestCost = currentCost;
+            byte mask =
+                ConnectionMasks[index];
+
+            int currentCost =
+                Costs[index];
+
+            int bestCost =
+                currentCost;
+
             int bestIndex = -1;
 
-            for (int direction = 0; direction < 8; direction++)
+            for (int direction = 0;
+                 direction < 8;
+                 direction++)
             {
-                byte bit = (byte)(1 << direction);
+                byte bit =
+                    (byte)(1 << direction);
 
                 if ((mask & bit) == 0)
                     continue;
 
                 int neighborX =
-                    x + GetNeighborX(direction);
+                    x +
+                    GetNeighborX(
+                        direction);
 
                 int neighborZ =
-                    z + GetNeighborZ(direction);
+                    z +
+                    GetNeighborZ(
+                        direction);
 
                 int neighborIndex =
                     neighborX +
                     neighborZ * Width;
 
-                if (CostVersions[neighborIndex] != Version)
+                if (CostVersions[neighborIndex] !=
+                    Version)
+                {
                     continue;
+                }
 
                 int neighborCost =
                     Costs[neighborIndex];
@@ -1330,14 +1708,21 @@ public class FlowFieldManager : MonoBehaviour
                 if (neighborCost >= bestCost)
                     continue;
 
-                bestCost = neighborCost;
-                bestIndex = neighborIndex;
+                bestCost =
+                    neighborCost;
+
+                bestIndex =
+                    neighborIndex;
             }
 
             if (bestIndex < 0)
             {
-                Directions[index] = float3.zero;
-                DirectionVersions[index] = Version;
+                Directions[index] =
+                    float3.zero;
+
+                DirectionVersions[index] =
+                    Version;
+
                 return;
             }
 
@@ -1347,31 +1732,43 @@ public class FlowFieldManager : MonoBehaviour
 
             directionVector.y = 0f;
 
-            if (math.lengthsq(directionVector) < 0.0001f)
+            if (math.lengthsq(
+                    directionVector) <
+                0.0001f)
             {
-                Directions[index] = float3.zero;
-                DirectionVersions[index] = Version;
+                Directions[index] =
+                    float3.zero;
+
+                DirectionVersions[index] =
+                    Version;
+
                 return;
             }
 
             Directions[index] =
-                math.normalize(directionVector);
+                math.normalize(
+                    directionVector);
 
             DirectionVersions[index] =
                 Version;
         }
 
-        private static int GetNeighborX(int direction)
+        private static int GetNeighborX(
+            int direction)
         {
             switch (direction)
             {
                 case 0: return -1;
                 case 1: return 1;
-                default: return direction >= 6 ? 1 : 0;
+                default:
+                    return direction >= 6
+                        ? 1
+                        : 0;
             }
         }
 
-        private static int GetNeighborZ(int direction)
+        private static int GetNeighborZ(
+            int direction)
         {
             switch (direction)
             {
