@@ -17,7 +17,6 @@ public class ZombieAttackController : MonoBehaviour
 
     public ZombieAttackDef CurrentAttackDef => currentAttack;
 
-    private Rigidbody rb;
     /// <summary>
     /// Returns true if at least one attack can currently be used
     /// against the target.
@@ -39,10 +38,9 @@ public class ZombieAttackController : MonoBehaviour
 
     public void Awake()
     {
-        rb = GetComponent<Rigidbody>();
     }
-    public void Init(
-        Zombie owner)
+
+    public void Init(Zombie owner)
     {
         zombie = owner;
         zombieDef = zombie.ZombieDef;
@@ -60,34 +58,37 @@ public class ZombieAttackController : MonoBehaviour
         }
 
         if (IsAttacking || IsOnCooldown)
-        {
             return;
-        }
 
-        currentAttack = SelectRandomAvailableAttack();
+        currentAttack =
+            SelectRandomAvailableAttack();
 
         if (currentAttack == null)
-        {
             return;
-        }
 
         timer = 0f;
         attackTriggered = false;
 
         IsAttacking = true;
-        
-        var targetDir = zombie.Target.position - transform.position;
-        targetDir.Normalize();
-        targetDir.y = 0f;
-        rb.rotation = Quaternion.LookRotation(targetDir, Vector3.up);
+
+        /*
+         * Movement owns Rigidbody rotation.
+         *
+         * Do not directly modify rb.rotation here.
+         * Otherwise ZombieMovement and the attack controller
+         * can fight over the Rigidbody's rotation.
+         */
+        if (zombie.Target != null)
+        {
+            zombie.Movement.FaceTarget(
+                zombie.Target.position);
+        }
     }
 
     public void UpdateAttack(float deltaTime)
     {
         if (zombieDef == null)
-        {
             return;
-        }
 
         if (IsOnCooldown)
         {
@@ -108,8 +109,10 @@ public class ZombieAttackController : MonoBehaviour
         {
             attackTriggered = true;
 
-            if(IsTargetInAttackRange(currentAttack))
+            if (IsTargetInAttackRange(currentAttack))
+            {
                 PerformAttack(currentAttack);
+            }
         }
 
         if (timer >= currentAttack.TotalAttackTime)
@@ -129,6 +132,13 @@ public class ZombieAttackController : MonoBehaviour
     private void UpdateCooldown(float deltaTime)
     {
         timer += deltaTime;
+
+        if (currentAttack == null)
+        {
+            timer = 0f;
+            IsOnCooldown = false;
+            return;
+        }
 
         if (timer >= currentAttack.Cooldown)
         {
@@ -154,58 +164,55 @@ public class ZombieAttackController : MonoBehaviour
             return false;
         }
 
-        float distanceSqr = GetHorizontalDistanceSqr(
+        float distanceSqr =
+            GetHorizontalDistanceSqr(
                 transform.position,
                 zombie.Target.position);
 
-        for (int i = 0;i < zombieDef.Attacks.Length; i++)
+        for (int i = 0;
+             i < zombieDef.Attacks.Length;
+             i++)
         {
-            ZombieAttackDef attack = zombieDef.Attacks[i];
+            ZombieAttackDef attack =
+                zombieDef.Attacks[i];
 
             if (attack == null)
-            {
                 continue;
-            }
-
-            float rangeSqr = attack.Range * attack.Range;
-
-            if (distanceSqr <= rangeSqr)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private bool IsTargetInAttackRange(ZombieAttackDef attack)
-    {
-        if (zombie == null ||
-            zombie.Target == null)
-        {
-            return false;
-        }
-
-        if(attack == null) return false;
-
-        float distanceSqr = GetHorizontalDistanceSqr(
-                transform.position,
-                zombie.Target.position);
 
             float rangeSqr =
                 attack.Range *
                 attack.Range;
 
             if (distanceSqr <= rangeSqr)
-            {
                 return true;
-            }
-        
+        }
+
         return false;
     }
 
-    private ZombieAttackDef
-        SelectRandomAvailableAttack()
+    private bool IsTargetInAttackRange(
+        ZombieAttackDef attack)
+    {
+        if (zombie == null ||
+            zombie.Target == null ||
+            attack == null)
+        {
+            return false;
+        }
+
+        float distanceSqr =
+            GetHorizontalDistanceSqr(
+                transform.position,
+                zombie.Target.position);
+
+        float rangeSqr =
+            attack.Range *
+            attack.Range;
+
+        return distanceSqr <= rangeSqr;
+    }
+
+    private ZombieAttackDef SelectRandomAvailableAttack()
     {
         if (zombieDef == null ||
             zombieDef.Attacks == null ||
@@ -236,9 +243,7 @@ public class ZombieAttackController : MonoBehaviour
                 zombieDef.Attacks[i];
 
             if (attack == null)
-            {
                 continue;
-            }
 
             float rangeSqr =
                 attack.Range *
@@ -251,9 +256,7 @@ public class ZombieAttackController : MonoBehaviour
         }
 
         if (availableAttacks.Count == 0)
-        {
             return null;
-        }
 
         int randomIndex =
             Random.Range(
@@ -266,36 +269,20 @@ public class ZombieAttackController : MonoBehaviour
     private void PerformAttack(
         ZombieAttackDef attack)
     {
-        //Debug.Log(
-        //    $"{name} performed attack: " +
-        //    $"{attack.name}",
-        //    this);
-
-        // Actual attack effect goes here.
-        //
-        // Melee:
-        //     Apply damage to the player.
-        //
-        // Spitter:
-        //     Spawn projectile.
-        //
-        // AoE:
-        //     Apply damage to targets in area.
-
         if (attack.AttackDef == null)
             return;
 
         if (!zombie.Target.TryGetComponent<IDamageable>(
-                    out IDamageable damageable))
+                out IDamageable damageable))
         {
             return;
         }
 
-        attack.AttackDef.Execute(new AttackContext(
-            zombie,
-            zombie.Target.transform.position,
-            zombie.Target.GetComponent<Collider>()
-            ));
+        attack.AttackDef.Execute(
+            new AttackContext(
+                zombie,
+                zombie.Target.transform.position,
+                zombie.Target.GetComponent<Collider>()));
     }
 
     private float GetHorizontalDistanceSqr(

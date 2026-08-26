@@ -532,4 +532,20 @@ public class ZombieMovement : MonoBehaviour
         Gizmos.color = Color.magenta;
         Gizmos.DrawWireSphere(transform.position, GetWorldRadius() + recoveryDistance);
     }
+    public void FaceTarget(Vector3 targetPosition)
+    {
+        Vector3 direction =
+            targetPosition - transform.position;
+
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude < 0.0001f)
+            return;
+
+        direction.Normalize();
+
+        currentDirection = direction;
+
+        Rotate();
+    }
 }
