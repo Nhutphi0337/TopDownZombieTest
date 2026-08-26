@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 [System.Serializable]
 public class LootEntry
@@ -19,10 +21,12 @@ public class LevelLootManager : MonoBehaviour
 
     [SerializeField]
     private List<LootEntry> lootTable = new();
-    
+
+    private List<Pickable> currentLoots;
     public void Init(IPooler pooler)
     {
         this.pooler = pooler;
+        currentLoots = new List<Pickable>();
     }
     public ItemPickupDef GetRandomLoot()
     {
@@ -71,6 +75,15 @@ public class LevelLootManager : MonoBehaviour
             var go = pooler.Spawn(loot.prefab.gameObject, position, Quaternion.identity);
             var pick = go as Pickable;
             pick.Init(loot);
+            currentLoots.Add(pick);
+        }
+    }
+
+    public void DestroyAllDrops()
+    {
+        foreach(var loot in currentLoots)
+        {
+            pooler.Return(loot);
         }
     }
 }

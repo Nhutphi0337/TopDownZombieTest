@@ -1844,7 +1844,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
-  m_Constraints: 0
+  m_Constraints: 80
   m_CollisionDetection: 1
 --- !u!136 &3099603761975937681
 CapsuleCollider:
@@ -1919,9 +1919,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   crowdRadius: 2
-  crowdStrength: 0.5
+  crowdStrength: 0.1
   maxNearbyZombies: 16
-  separationUpdateInterval: 0.1
+  separationUpdateInterval: 1
   obstacleMask:
     serializedVersion: 2
     m_Bits: 128

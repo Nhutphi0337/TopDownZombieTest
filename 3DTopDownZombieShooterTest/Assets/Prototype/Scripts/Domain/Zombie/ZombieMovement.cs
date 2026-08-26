@@ -11,10 +11,9 @@ public class ZombieMovement : MonoBehaviour
     [Header("Crowd")]
     [SerializeField] private LayerMask zombieMask;
     [SerializeField] private float crowdRadius = 1.2f;
-    [SerializeField] private float crowdStrength = 0.35f;
+    [SerializeField] private float crowdStrength = 1.5f;
     [SerializeField] private int maxNearbyZombies = 16;
     [SerializeField] private float separationUpdateInterval = 0.1f;
-    [SerializeField] private float separationDeadZone = 0.2f;
 
     [Header("Obstacle Avoidance")]
     [SerializeField] private LayerMask obstacleMask;
@@ -25,7 +24,6 @@ public class ZombieMovement : MonoBehaviour
     [Header("Wall Following")]
     [SerializeField] private float wallFollowDuration = 1.5f;
     [SerializeField] private float wallFollowLookAhead = 0.5f;
-    [SerializeField] private float wallFollowExitClearance = 0.15f;
 
     [Header("Flow Field Recovery")]
     [SerializeField] private float recoveryDistance = 0.15f;
@@ -57,11 +55,7 @@ public class ZombieMovement : MonoBehaviour
         nearbyZombies = new Collider[maxNearbyZombies];
 
         rb.useGravity = true;
-        rb.constraints =
-            RigidbodyConstraints.FreezeRotationX |
-            RigidbodyConstraints.FreezeRotationY |
-            RigidbodyConstraints.FreezeRotationZ;
-
+        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
     }
 
@@ -89,8 +83,6 @@ public class ZombieMovement : MonoBehaviour
         isWallFollowing = false;
         wallFollowTimer = 0f;
         isRecoveringFromInvalidCell = false;
-
-        StopHorizontalMovement();
     }
 
     private void FixedUpdate()
@@ -106,7 +98,7 @@ public class ZombieMovement : MonoBehaviour
 
         if (flowField == null)
         {
-            SmoothDirection(desiredDirection);
+            currentDirection = Vector3.Slerp(currentDirection, desiredDirection, directionSmoothness * Time.fixedDeltaTime);
             return;
         }
 
@@ -118,29 +110,28 @@ public class ZombieMovement : MonoBehaviour
             isWallFollowing = false;
             wallFollowTimer = 0f;
 
-            if (flowField.TryGetRecoveryDirection(
-                    transform.position,
-                    out Vector3 recoveryDirection))
+            if (flowField.TryGetRecoveryDirection(transform.position, out Vector3 recoveryDirection))
             {
                 Vector3 safeRecoveryDirection = GetRecoveryDirection(recoveryDirection);
 
-                if (safeRecoveryDirection.sqrMagnitude > 0.0001f)
-                {
-                    currentDirection = Vector3.Slerp(
-                        currentDirection,
-                        safeRecoveryDirection,
-                        directionSmoothness * Time.fixedDeltaTime);
+                currentDirection = Vector3.Slerp(
+                    currentDirection,
+                    safeRecoveryDirection,
+                    directionSmoothness * Time.fixedDeltaTime);
 
-                    currentDirection.y = 0f;
+                currentDirection.y = 0f;
 
-                    if (currentDirection.sqrMagnitude > 1f)
-                        currentDirection.Normalize();
+                if (currentDirection.sqrMagnitude > 1f)
+                    currentDirection.Normalize();
 
-                    return;
-                }
+                return;
             }
 
-            SmoothDirection(Vector3.zero);
+            currentDirection = Vector3.Slerp(
+                currentDirection,
+                Vector3.zero,
+                directionSmoothness * Time.fixedDeltaTime);
+
             return;
         }
 
@@ -154,7 +145,11 @@ public class ZombieMovement : MonoBehaviour
 
         if (flowDirection.sqrMagnitude < 0.0001f)
         {
-            SmoothDirection(Vector3.zero);
+            currentDirection = Vector3.Slerp(
+                currentDirection,
+                Vector3.zero,
+                directionSmoothness * Time.fixedDeltaTime);
+
             return;
         }
 
@@ -163,33 +158,24 @@ public class ZombieMovement : MonoBehaviour
 
         if (direction.sqrMagnitude < 0.0001f)
         {
-            SmoothDirection(Vector3.zero);
+            currentDirection = Vector3.Slerp(
+                currentDirection,
+                Vector3.zero,
+                directionSmoothness * Time.fixedDeltaTime);
+
             return;
         }
 
-        SmoothDirection(direction);
-    }
-
-    private void SmoothDirection(Vector3 targetDirection)
-    {
-        targetDirection.y = 0f;
-
-        if (targetDirection.sqrMagnitude > 1f)
-            targetDirection.Normalize();
-
-        float smoothing = 1f - Mathf.Exp(-directionSmoothness * Time.fixedDeltaTime);
-
         currentDirection = Vector3.Slerp(
             currentDirection,
-            targetDirection,
-            smoothing);
+            direction,
+            directionSmoothness * Time.fixedDeltaTime);
 
         currentDirection.y = 0f;
 
         if (currentDirection.sqrMagnitude > 1f)
             currentDirection.Normalize();
     }
-
     private Vector3 GetFlowFieldDirection()
     {
         Vector3 direction = FlowFieldManager.Instance.GetDirection(transform.position);
@@ -211,6 +197,9 @@ public class ZombieMovement : MonoBehaviour
 
         recoveryDirection.Normalize();
 
+        Vector3 origin = GetCastOrigin();
+        float radius = GetWorldRadius();
+
         Vector3 safeDirection = GetObstacleAvoidanceDirection(recoveryDirection);
 
         if (safeDirection.sqrMagnitude < 0.0001f)
@@ -220,10 +209,7 @@ public class ZombieMovement : MonoBehaviour
 
         if (separation.sqrMagnitude > 0.0001f)
         {
-            Vector3 adjusted =
-                safeDirection +
-                separation * (crowdStrength * 0.25f);
-
+            Vector3 adjusted = safeDirection + separation * (crowdStrength * 0.25f);
             adjusted.y = 0f;
 
             if (adjusted.sqrMagnitude > 0.0001f)
@@ -235,19 +221,21 @@ public class ZombieMovement : MonoBehaviour
 
     private Vector3 GetCrowdControlledDirection(Vector3 baseDirection)
     {
-        if (baseDirection.sqrMagnitude < 0.0001f)
+        Vector3 direction = baseDirection;
+
+        if (direction.sqrMagnitude < 0.0001f)
             return Vector3.zero;
 
         Vector3 separation = CalculateSeparation();
 
         if (separation.sqrMagnitude < 0.0001f)
-            return baseDirection;
+            return direction;
 
-        Vector3 adjusted = baseDirection + separation * crowdStrength;
+        Vector3 adjusted = direction + separation * crowdStrength;
         adjusted.y = 0f;
 
         if (adjusted.sqrMagnitude < 0.0001f)
-            return baseDirection;
+            return direction;
 
         adjusted.Normalize();
 
@@ -288,26 +276,12 @@ public class ZombieMovement : MonoBehaviour
                 continue;
 
             float distance = Mathf.Sqrt(distanceSqr);
-
-            float normalizedDistance =
-                Mathf.Clamp01(distance / crowdRadius);
-
-            if (normalizedDistance > 1f - separationDeadZone)
-                continue;
-
-            float weight = 1f - normalizedDistance;
+            float weight = 1f - Mathf.Clamp01(distance / crowdRadius);
 
             separation += offset / distance * weight;
         }
 
-        if (separation.sqrMagnitude < 0.0001f)
-        {
-            cachedSeparation = Vector3.zero;
-        }
-        else
-        {
-            cachedSeparation = separation.normalized;
-        }
+        cachedSeparation = separation.sqrMagnitude < 0.0001f ? Vector3.zero : separation.normalized;
 
         return cachedSeparation;
     }
@@ -321,9 +295,7 @@ public class ZombieMovement : MonoBehaviour
         {
             wallFollowTimer -= Time.fixedDeltaTime;
 
-            // Keep following the same wall side. Only leave wall following
-            // once the original desired direction has enough clearance.
-            if (HasWallFollowExitClearance(origin, desired, radius))
+            if (CanMoveInDirection(origin, desired, radius))
             {
                 isWallFollowing = false;
                 return desired;
@@ -333,10 +305,7 @@ public class ZombieMovement : MonoBehaviour
             {
                 isWallFollowing = false;
 
-                Vector3 escape = FindEscapeDirection(
-                    desired,
-                    origin,
-                    radius);
+                Vector3 escape = FindEscapeDirection(desired, origin, radius);
 
                 if (escape.sqrMagnitude > 0.0001f)
                     return escape;
@@ -344,19 +313,12 @@ public class ZombieMovement : MonoBehaviour
                 return desired;
             }
 
-            if (CanMoveInDirection(origin, wallDirection, radius))
-                return wallDirection;
-
-            // The selected wall side is temporarily blocked. Do not
-            // immediately switch to the opposite side; try a nearby escape
-            // direction while preserving the current wall-follow commitment.
-            Vector3 followDirection =
-                GetStableWallFollowDirection(desired, origin, radius);
+            Vector3 followDirection = GetWallFollowDirection(desired, origin, radius);
 
             if (followDirection.sqrMagnitude > 0.0001f)
                 return followDirection;
 
-            return wallDirection;
+            isWallFollowing = false;
         }
 
         if (CanMoveInDirection(origin, desired, radius))
@@ -365,10 +327,7 @@ public class ZombieMovement : MonoBehaviour
         if (TryStartWallFollowing(desired, origin, radius))
             return wallDirection;
 
-        Vector3 escapeDirection = FindEscapeDirection(
-            desired,
-            origin,
-            radius);
+        Vector3 escapeDirection = FindEscapeDirection(desired, origin, radius);
 
         if (escapeDirection.sqrMagnitude > 0.0001f)
             return escapeDirection;
@@ -376,10 +335,7 @@ public class ZombieMovement : MonoBehaviour
         return Vector3.zero;
     }
 
-    private bool TryStartWallFollowing(
-        Vector3 desired,
-        Vector3 origin,
-        float radius)
+    private bool TryStartWallFollowing(Vector3 desired, Vector3 origin, float radius)
     {
         if (!Physics.SphereCast(
                 origin,
@@ -411,35 +367,22 @@ public class ZombieMovement : MonoBehaviour
 
         Vector3 opposite = -tangent;
 
-        float tangentScore =
-            GetWallDirectionScore(tangent, desired, origin, radius);
-
-        float oppositeScore =
-            GetWallDirectionScore(opposite, desired, origin, radius);
+        float tangentScore = GetWallDirectionScore(tangent, desired, origin, radius);
+        float oppositeScore = GetWallDirectionScore(opposite, desired, origin, radius);
 
         if (tangentScore <= 0f && oppositeScore <= 0f)
             return false;
 
-        wallDirection =
-            tangentScore >= oppositeScore
-                ? tangent
-                : opposite;
-
+        wallDirection = tangentScore >= oppositeScore ? tangent : opposite;
         isWallFollowing = true;
         wallFollowTimer = wallFollowDuration;
 
         return true;
     }
 
-    private Vector3 GetStableWallFollowDirection(
-        Vector3 desired,
-        Vector3 origin,
-        float radius)
+    private Vector3 GetWallFollowDirection(Vector3 desired, Vector3 origin, float radius)
     {
-        Vector3 tangent = Vector3.Cross(
-            Vector3.up,
-            wallNormal);
-
+        Vector3 tangent = Vector3.Cross(Vector3.up, wallNormal);
         tangent.y = 0f;
 
         if (tangent.sqrMagnitude < 0.0001f)
@@ -449,102 +392,44 @@ public class ZombieMovement : MonoBehaviour
 
         Vector3 opposite = -tangent;
 
-        // Prefer the already selected wall direction. This prevents
-        // left/right oscillation while the zombie is committed to a wall.
         if (CanMoveInDirection(origin, wallDirection, radius))
             return wallDirection;
 
-        Vector3 preferred = wallDirection;
-        Vector3 alternate =
-            Vector3.Dot(preferred, tangent) >= 0f
-                ? opposite
-                : tangent;
+        float tangentScore = GetWallDirectionScore(tangent, desired, origin, radius);
+        float oppositeScore = GetWallDirectionScore(opposite, desired, origin, radius);
 
-        if (CanMoveInDirection(origin, preferred, radius))
-            return preferred;
+        if (tangentScore <= 0f && oppositeScore <= 0f)
+            return Vector3.zero;
 
-        if (CanMoveInDirection(origin, alternate, radius))
-        {
-            // Only switch when the current side is genuinely blocked.
-            wallDirection = alternate;
-            return wallDirection;
-        }
+        wallDirection = tangentScore >= oppositeScore ? tangent : opposite;
 
-        return Vector3.zero;
+        return wallDirection;
     }
 
-    private bool HasWallFollowExitClearance(
-        Vector3 origin,
-        Vector3 desired,
-        float radius)
-    {
-        if (!CanMoveInDirection(origin, desired, radius))
-            return false;
-
-        Vector3 lookAhead =
-            origin + desired.normalized *
-            (avoidanceDistance + wallFollowExitClearance);
-
-        return CanMoveInDirection(
-            lookAhead,
-            desired,
-            radius);
-    }
-
-    private float GetWallDirectionScore(
-        Vector3 direction,
-        Vector3 desired,
-        Vector3 origin,
-        float radius)
+    private float GetWallDirectionScore(Vector3 direction, Vector3 desired, Vector3 origin, float radius)
     {
         if (!CanMoveInDirection(origin, direction, radius))
             return -1f;
 
         float alignment = Vector3.Dot(direction, desired);
+        Vector3 lookAhead = origin + direction * wallFollowLookAhead;
 
-        Vector3 lookAhead =
-            origin + direction * wallFollowLookAhead;
-
-        if (!CanMoveInDirection(
-                lookAhead,
-                direction,
-                radius))
-        {
+        if (!CanMoveInDirection(lookAhead, direction, radius))
             return -1f;
-        }
 
         return alignment;
     }
 
-    private Vector3 FindEscapeDirection(
-        Vector3 desired,
-        Vector3 origin,
-        float radius)
+    private Vector3 FindEscapeDirection(Vector3 desired, Vector3 origin, float radius)
     {
         Vector3 bestDirection = Vector3.zero;
         float bestScore = float.NegativeInfinity;
 
-        float[] angles =
-        {
-            30f,
-            -30f,
-            45f,
-            -45f,
-            90f,
-            -90f,
-            135f,
-            -135f,
-            180f
-        };
+        float[] angles = { 45f, -45f, 90f, -90f, 135f, -135f, 180f };
 
         for (int i = 0; i < angles.Length; i++)
         {
-            Vector3 candidate =
-                Quaternion.Euler(
-                    0f,
-                    angles[i],
-                    0f) * desired;
-
+            Vector3 candidate = Quaternion.Euler(0f, angles[i], 0f) * desired;
             candidate.y = 0f;
 
             if (candidate.sqrMagnitude < 0.0001f)
@@ -552,19 +437,11 @@ public class ZombieMovement : MonoBehaviour
 
             candidate.Normalize();
 
-            if (!CanMoveInDirection(
-                    origin,
-                    candidate,
-                    radius))
-            {
+            if (!CanMoveInDirection(origin, candidate, radius))
                 continue;
-            }
 
-            float score = Vector3.Dot(
-                desired,
-                candidate);
+            float score = Vector3.Dot(desired, candidate);
 
-            // Prefer directions that preserve the original movement intent.
             if (score > bestScore)
             {
                 bestScore = score;
@@ -575,10 +452,7 @@ public class ZombieMovement : MonoBehaviour
         return bestDirection;
     }
 
-    private bool CanMoveInDirection(
-        Vector3 origin,
-        Vector3 direction,
-        float radius)
+    private bool CanMoveInDirection(Vector3 origin, Vector3 direction, float radius)
     {
         direction.y = 0f;
 
@@ -587,8 +461,7 @@ public class ZombieMovement : MonoBehaviour
 
         direction.Normalize();
 
-        float castRadius =
-            Mathf.Max(radius - wallClearance, 0.01f);
+        float castRadius = Mathf.Max(radius - wallClearance, 0.01f);
 
         return !Physics.SphereCast(
             origin,
@@ -610,9 +483,7 @@ public class ZombieMovement : MonoBehaviour
             return;
         }
 
-        Vector3 velocity =
-            direction.normalized * moveSpeed;
-
+        Vector3 velocity = direction * moveSpeed;
         velocity.y = rb.velocity.y;
         rb.velocity = velocity;
     }
@@ -624,43 +495,25 @@ public class ZombieMovement : MonoBehaviour
         if (direction.sqrMagnitude < 0.001f)
             return;
 
-        Quaternion targetRotation =
-            Quaternion.LookRotation(
-                direction,
-                Vector3.up);
-
-        Quaternion newRotation =
-            Quaternion.RotateTowards(
-                rb.rotation,
-                targetRotation,
-                rotationSpeed * Time.fixedDeltaTime);
+        Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
+        Quaternion newRotation = Quaternion.RotateTowards(rb.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
 
         rb.MoveRotation(newRotation);
     }
 
     private Vector3 GetCastOrigin()
     {
-        Vector3 center =
-            transform.TransformPoint(
-                capsuleCollider.center);
+        Vector3 center = transform.TransformPoint(capsuleCollider.center);
 
-        return new Vector3(
-            center.x,
-            transform.position.y + avoidanceHeight,
-            center.z);
+        return new Vector3(center.x, transform.position.y + avoidanceHeight, center.z);
     }
 
     private float GetWorldRadius()
     {
         Vector3 scale = transform.lossyScale;
+        float horizontalScale = Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.z));
 
-        float horizontalScale =
-            Mathf.Max(
-                Mathf.Abs(scale.x),
-                Mathf.Abs(scale.z));
-
-        return capsuleCollider.radius *
-               horizontalScale;
+        return capsuleCollider.radius * horizontalScale;
     }
 
     private void StopHorizontalMovement()
@@ -677,9 +530,6 @@ public class ZombieMovement : MonoBehaviour
             return;
 
         Gizmos.color = Color.magenta;
-
-        Gizmos.DrawWireSphere(
-            transform.position,
-            GetWorldRadius() + recoveryDistance);
+        Gizmos.DrawWireSphere(transform.position, GetWorldRadius() + recoveryDistance);
     }
 }

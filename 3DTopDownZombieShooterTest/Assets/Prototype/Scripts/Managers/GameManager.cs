@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
     public Scene CurrentLevelScene { get; private set; }
     private void Awake()
     {
+        Application.targetFrameRate = 30;
     }
     private void Start()
     {

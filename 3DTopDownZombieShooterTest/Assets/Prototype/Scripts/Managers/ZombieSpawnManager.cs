@@ -297,6 +297,8 @@ public class ZombieSpawnManager : MonoBehaviour
     public void SetLevelFail()
     {
         levelDone = true;
+        if(spawnCou != null)
+            StopCoroutine(spawnCou);
         DestroyAllZombies();
     }
     public void DestroyAllZombies()

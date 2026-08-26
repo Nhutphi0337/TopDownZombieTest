@@ -17,6 +17,7 @@ public class ZombieAttackController : MonoBehaviour
 
     public ZombieAttackDef CurrentAttackDef => currentAttack;
 
+    private Rigidbody rb;
     /// <summary>
     /// Returns true if at least one attack can currently be used
     /// against the target.
@@ -36,6 +37,10 @@ public class ZombieAttackController : MonoBehaviour
     public bool IsBusy =>
         IsAttacking || IsOnCooldown;
 
+    public void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+    }
     public void Init(
         Zombie owner)
     {
@@ -70,6 +75,11 @@ public class ZombieAttackController : MonoBehaviour
         attackTriggered = false;
 
         IsAttacking = true;
+        
+        var targetDir = zombie.Target.position - transform.position;
+        targetDir.Normalize();
+        targetDir.y = 0f;
+        rb.rotation = Quaternion.LookRotation(targetDir, Vector3.up);
     }
 
     public void UpdateAttack(float deltaTime)

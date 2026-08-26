@@ -87,12 +87,14 @@ public class LevelController : MonoBehaviour
 
     public void OnLevelClear()
     {
+        levelLootManager.DestroyAllDrops();
         gameManager.UIManager.PrepareUIsOnDoneLevel();
         gameManager.UIManager.LevelDoneUI.SetWin();
     }
 
     public void OnLevelFail()
     {
+        levelLootManager.DestroyAllDrops();
         zombieSpawnManager.SetLevelFail();
         gameManager.UIManager.PrepareUIsOnDoneLevel();
         gameManager.UIManager.LevelDoneUI.SetLose();

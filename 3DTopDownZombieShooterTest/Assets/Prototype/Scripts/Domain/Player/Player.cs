@@ -65,6 +65,14 @@ public class Player : MonoBehaviour, IDamageable, ITeam
             Input.DisableActions();
         }
 
+        if(GunController != null)
+        {
+            GunController.SetActiveCurrentGun(false);
+        }
+        if(GunGripController != null)
+        {
+            GunGripController.DisableFollowing();
+        }
         if (GrenadeController != null)
         {
             GrenadeController.CancelThrow();
