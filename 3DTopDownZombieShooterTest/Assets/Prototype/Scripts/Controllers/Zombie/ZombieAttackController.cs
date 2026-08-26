@@ -71,13 +71,6 @@ public class ZombieAttackController : MonoBehaviour
 
         IsAttacking = true;
 
-        /*
-         * Movement owns Rigidbody rotation.
-         *
-         * Do not directly modify rb.rotation here.
-         * Otherwise ZombieMovement and the attack controller
-         * can fight over the Rigidbody's rotation.
-         */
         if (zombie.Target != null)
         {
             zombie.Movement.FaceTarget(

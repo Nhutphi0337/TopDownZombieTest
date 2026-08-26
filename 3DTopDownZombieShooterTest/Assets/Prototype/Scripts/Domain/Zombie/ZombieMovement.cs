@@ -47,6 +47,7 @@ public class ZombieMovement : MonoBehaviour
 
     private bool isRecoveringFromInvalidCell;
 
+    private bool isStopped;
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -74,19 +75,25 @@ public class ZombieMovement : MonoBehaviour
         desiredDirection = direction;
     }
 
-    public void Stop()
+    public void SetStop(bool stop)
     {
-        desiredDirection = Vector3.zero;
-        currentDirection = Vector3.zero;
-        cachedSeparation = Vector3.zero;
-        separationTimer = 0f;
-        isWallFollowing = false;
-        wallFollowTimer = 0f;
-        isRecoveringFromInvalidCell = false;
+        isStopped = stop;
+
+        if (isStopped)
+        {
+            desiredDirection = Vector3.zero;
+            currentDirection = Vector3.zero;
+            cachedSeparation = Vector3.zero;
+            separationTimer = 0f;
+            isWallFollowing = false;
+            wallFollowTimer = 0f;
+            isRecoveringFromInvalidCell = false;
+        }
     }
 
     private void FixedUpdate()
     {
+        if (isStopped) return;
         UpdateMovementDirection();
         Move();
         Rotate();

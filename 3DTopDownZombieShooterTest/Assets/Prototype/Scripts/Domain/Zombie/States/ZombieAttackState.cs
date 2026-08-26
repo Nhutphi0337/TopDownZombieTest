@@ -9,7 +9,6 @@ public class ZombieAttackState : IState
 
     public void Enter()
     {
-        zombie.Movement.Stop();
         StartAttack();
     }
 

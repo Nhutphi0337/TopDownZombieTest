@@ -7,8 +7,6 @@ public class ZombieDeadState : IState
     }
     public void Enter()
     {
-        zombie.Movement.Stop();
-
         //zombie.pooler.Spawn();
         AudioManager.Instance.Play(zombie.ZombieDef.DeadSound);
 

@@ -11,6 +11,7 @@ public class ZombieChaseState : IState
 
     public void Enter()
     {
+        zombie.Movement.SetStop(false);
         zombie.AnimationController.SetWalking(true);
         AudioManager.Instance.Play(zombie.ZombieDef.ChaseSound);
     }
@@ -19,7 +20,7 @@ public class ZombieChaseState : IState
     {
         if (zombie.Target == null)
         {
-            zombie.Movement.Stop();
+            zombie.Movement.SetStop(true);
             zombie.AnimationController.SetWalking(false);
             return;
         }
@@ -33,7 +34,7 @@ public class ZombieChaseState : IState
 
     public void Exit()
     {
-        zombie.Movement.Stop();
+        zombie.Movement.SetStop(true);
         zombie.AnimationController.SetWalking(false);
     }
 }

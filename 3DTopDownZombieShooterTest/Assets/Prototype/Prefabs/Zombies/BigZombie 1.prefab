@@ -742,9 +742,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   crowdRadius: 3.2
-  crowdStrength: 1
+  crowdStrength: 0.5
   maxNearbyZombies: 16
-  separationUpdateInterval: 1
+  separationUpdateInterval: 0.1
   obstacleMask:
     serializedVersion: 2
     m_Bits: 128
