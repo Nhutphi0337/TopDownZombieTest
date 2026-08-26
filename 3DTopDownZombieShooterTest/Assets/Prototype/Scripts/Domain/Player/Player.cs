@@ -18,6 +18,8 @@ public class Player : MonoBehaviour, IDamageable, ITeam
     public PlayerGrenadeController GrenadeController { private set; get; }
     public Team Team => Team.Player;
 
+    public bool isAlive { get; private set; }
+
     public event Action<float/*current HP*/, float/*previous HP*/, float/*max HP*/> OnHeal;
     public event Action<float/*current HP*/, float/*previous HP*/, float/*max HP*/> OnTakeDamage;
 
@@ -40,6 +42,8 @@ public class Player : MonoBehaviour, IDamageable, ITeam
 
     public void Init()
     {
+        isAlive = true;
+        Movement.Init(this);
         Aim.Init(this);
         Picking.Init(this);
         Equipment.Init(this);
@@ -54,6 +58,8 @@ public class Player : MonoBehaviour, IDamageable, ITeam
 
     public void Die()
     {
+        isAlive = false;
+
         if(Input != null)
         {
             Input.DisableActions();

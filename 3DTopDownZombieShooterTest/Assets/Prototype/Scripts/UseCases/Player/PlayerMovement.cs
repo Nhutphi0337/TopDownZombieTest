@@ -1,7 +1,6 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(PlayerInput))]
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
@@ -13,14 +12,13 @@ public class PlayerMovement : MonoBehaviour
     private Camera gameplayCamera;
 
     private Rigidbody playerRigidbody;
-    private PlayerInput playerInput;
 
     private bool movementEnabled = true;
 
+    private Player player;
     private void Awake()
     {
         playerRigidbody = GetComponent<Rigidbody>();
-        playerInput = GetComponent<PlayerInput>();
 
         if (gameplayCamera == null)
         {
@@ -34,9 +32,11 @@ public class PlayerMovement : MonoBehaviour
         {
             return;
         }
+    }
 
-        // Input is read by PlayerInput.
-        // PlayerMovement consumes the resulting movement intent.
+    public void Init(Player player)
+    {
+        this.player = player;
     }
 
     private void FixedUpdate()
@@ -87,8 +87,8 @@ public class PlayerMovement : MonoBehaviour
         }
 
         Vector3 movement =
-            cameraRight * playerInput.MovementInput.x +
-            cameraForward * playerInput.MovementInput.y;
+            cameraRight * player.Input.MovementInput.x +
+            cameraForward * player.Input.MovementInput.y;
 
         movement.y = 0f;
 
